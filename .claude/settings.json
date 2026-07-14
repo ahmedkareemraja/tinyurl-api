@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(timeout 4 node dist/server.js)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(cat)",
+      "Bash(npx tsc *)",
+      "Bash(rm -f /tmp_test_catch.ts)"
+    ]
+  }
+}

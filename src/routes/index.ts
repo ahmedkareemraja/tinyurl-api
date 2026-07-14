@@ -1,4 +1,4 @@
-import { Express, NextFunction, Request, Response, Router } from 'express';
+import { type Express, type NextFunction, type Request, type Response, Router } from 'express';
 
 interface RouteDefinition {
   path: string;
@@ -17,7 +17,7 @@ const routerConfig: {
   ],
 };
 
-function authenticateToken(req: Request, res: Response, next: NextFunction) {
+function authenticateToken(_req: Request, _res: Response, next: NextFunction) {
   // TODO: implement token verification
   next();
 }

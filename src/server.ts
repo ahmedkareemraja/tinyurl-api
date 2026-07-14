@@ -1,12 +1,15 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+
+import errorHandler from './middlewares/errorHandler';
 
 dotenv.config();
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(errorHandler);
 
 const { PORT, DB_CONNECTION_STRING } = process.env;
 
