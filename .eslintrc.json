@@ -1,0 +1,31 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "sourceType": "module",
+    "requireConfigFile": false,
+    "babelOptions": {
+      "presets": ["@babel/preset-typescript"]
+    }
+  },
+  "plugins": ["import", "prettier"],
+  "extends": ["eslint:recommended", "plugin:import/recommended", "plugin:prettier/recommended"],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".ts"]
+      }
+    }
+  },
+  "rules": {
+    "import/no-unresolved": "off",
+    "import/named": "off",
+    "no-undef": "off",
+    "no-unused-vars": "off"
+  },
+  "ignorePatterns": ["dist", "node_modules"]
+}

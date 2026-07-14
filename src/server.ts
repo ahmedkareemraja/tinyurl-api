@@ -11,16 +11,19 @@ app.use(express.urlencoded({ extended: true }));
 const { PORT, DB_CONNECTION_STRING } = process.env;
 
 if (!DB_CONNECTION_STRING) {
-    throw new Error("Missing DB_CONNECTION_STRING environment variable");
+  throw new Error("Missing DB_CONNECTION_STRING environment variable");
 }
 if (!PORT) {
-    throw new Error("Missing PORT environment variable");
+  throw new Error("Missing PORT environment variable");
 }
 
-mongoose.connect(DB_CONNECTION_STRING).then(() => {
+mongoose
+  .connect(DB_CONNECTION_STRING)
+  .then(() => {
     app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
+      console.log(`Server is running on port ${PORT}`);
     });
-}).catch((err) => {
+  })
+  .catch((err) => {
     console.log(err);
-});
+  });
