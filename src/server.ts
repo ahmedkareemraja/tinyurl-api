@@ -1,6 +1,6 @@
-import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
 dotenv.config();
 const app = express();
@@ -11,10 +11,10 @@ app.use(express.urlencoded({ extended: true }));
 const { PORT, DB_CONNECTION_STRING } = process.env;
 
 if (!DB_CONNECTION_STRING) {
-  throw new Error("Missing DB_CONNECTION_STRING environment variable");
+  throw new Error('Missing DB_CONNECTION_STRING environment variable');
 }
 if (!PORT) {
-  throw new Error("Missing PORT environment variable");
+  throw new Error('Missing PORT environment variable');
 }
 
 mongoose

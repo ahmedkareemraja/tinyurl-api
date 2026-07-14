@@ -11,7 +11,8 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "lint": "eslint . --ext .ts,.js"
+    "lint": "eslint . --ext .ts,.js",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

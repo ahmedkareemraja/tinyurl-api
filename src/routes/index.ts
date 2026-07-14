@@ -1,4 +1,4 @@
-import { Express, NextFunction, Request, Response, Router } from "express";
+import { Express, NextFunction, Request, Response, Router } from 'express';
 
 interface RouteDefinition {
   path: string;
