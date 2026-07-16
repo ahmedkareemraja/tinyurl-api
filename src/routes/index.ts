@@ -1,5 +1,6 @@
 import { type Express, type NextFunction, type Request, type Response, Router } from 'express';
 
+import authRouterV1 from './auth/auth.routes.v1';
 import usersRouterv1 from './users/users.routes.v1';
 
 interface RouteDefinition {
@@ -11,7 +12,10 @@ const routerConfig: {
   publicRoutes: RouteDefinition[];
   privateRoutes: RouteDefinition[];
 } = {
-  publicRoutes: [{ path: '/api/v1/users', router: usersRouterv1 }],
+  publicRoutes: [
+    { path: '/api/v1/users', router: usersRouterv1 },
+    { path: '/api/v1/auth', router: authRouterV1 },
+  ],
   privateRoutes: [],
 };
 

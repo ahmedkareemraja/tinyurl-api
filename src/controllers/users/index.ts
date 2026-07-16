@@ -1,8 +1,7 @@
 import { type Request, type Response, type NextFunction } from 'express';
 
 import UsersService from '../../services/users';
-
-import UsersUtils from './utils';
+import UsersUtils from '../../utils/users';
 
 class UsersController {
   static async addUser(this: void, req: Request, res: Response, next: NextFunction) {

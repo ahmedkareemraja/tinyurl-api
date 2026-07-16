@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema<IUser>(
 
 userSchema.pre('validate', function () {
   if (!this.isModified('password')) return;
-  console.log('Password is being hashed', this.password);
+
   const { salt, hash } = Encryption.createHashedPassword(this.password);
   this.salt = salt;
   this.password = hash;
