@@ -3,12 +3,17 @@ import express from 'express';
 import mongoose from 'mongoose';
 
 import errorHandler from './middlewares/errorHandler';
+import routes from './routes';
+import logger from './utils/logger';
 
 dotenv.config();
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+routes(app);
+
 app.use(errorHandler);
 
 const { PORT, DB_CONNECTION_STRING } = process.env;
@@ -23,10 +28,11 @@ if (!PORT) {
 mongoose
   .connect(DB_CONNECTION_STRING)
   .then(() => {
+    logger.info('Connected to MongoDB');
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      logger.info(`Server is running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.log(err);
+    logger.error('Error connecting to MongoDB:', err);
   });

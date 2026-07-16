@@ -1,5 +1,7 @@
 import { type Express, type NextFunction, type Request, type Response, Router } from 'express';
 
+import usersRouterv1 from './users/users.routes.v1';
+
 interface RouteDefinition {
   path: string;
   router: Router;
@@ -9,12 +11,8 @@ const routerConfig: {
   publicRoutes: RouteDefinition[];
   privateRoutes: RouteDefinition[];
 } = {
-  publicRoutes: [
-    // { path: "", router: undefined },
-  ],
-  privateRoutes: [
-    // { path: "", router: undefined },
-  ],
+  publicRoutes: [{ path: '/api/v1/users', router: usersRouterv1 }],
+  privateRoutes: [],
 };
 
 function authenticateToken(_req: Request, _res: Response, next: NextFunction) {

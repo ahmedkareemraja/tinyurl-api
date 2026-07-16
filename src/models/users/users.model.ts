@@ -1,6 +1,17 @@
 import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema(
+import Encryption from '../../utils/encryption';
+
+export interface IUser {
+  fullName: string;
+  email: string;
+  password: string;
+  salt: string;
+  refreshToken?: string;
+  isDeleted: boolean;
+}
+
+const userSchema = new mongoose.Schema<IUser>(
   {
     fullName: {
       type: String,
@@ -14,14 +25,17 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     salt: {
       type: String,
       required: true,
+      select: false,
     },
     refreshToken: {
       type: String,
       required: false,
+      select: false,
     },
     isDeleted: {
       type: Boolean,
@@ -33,6 +47,14 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-const User = mongoose.model('User', userSchema);
+userSchema.pre('validate', function () {
+  if (!this.isModified('password')) return;
+  console.log('Password is being hashed', this.password);
+  const { salt, hash } = Encryption.createHashedPassword(this.password);
+  this.salt = salt;
+  this.password = hash;
+});
+
+const User = mongoose.model<IUser>('User', userSchema);
 
 export default User;
