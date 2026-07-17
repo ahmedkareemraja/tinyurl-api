@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Encryption from '../../utils/encryption';
 
 export interface IUser {
+  _id: mongoose.Types.ObjectId;
   fullName: string;
   email: string;
   password: string;

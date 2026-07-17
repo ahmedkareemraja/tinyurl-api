@@ -5,6 +5,12 @@ import jwt from 'jsonwebtoken';
 import BaseError from './BaseError';
 import logger from './logger';
 
+export interface TokenPayload {
+  userid: string;
+  email: string;
+  fullName: string;
+}
+
 class Encryption {
   static generateRandomKey(bytes = 8): void {
     const array = new Uint8Array(bytes);
@@ -33,7 +39,7 @@ class Encryption {
     return hashedPassword === hash;
   }
 
-  static generateToken(payload: object): string {
+  static generateToken(payload: TokenPayload): string {
     const secret = process.env['JWT_KEY'];
     if (!secret) {
       throw new BaseError('JWT_KEY is not configured', 500);
@@ -41,7 +47,7 @@ class Encryption {
     return jwt.sign(payload, secret, { expiresIn: '1h' });
   }
 
-  static generateRefreshToken(payload: object): string {
+  static generateRefreshToken(payload: TokenPayload): string {
     const secret = process.env['REFRESH_TOKEN_KEY'];
     if (!secret) {
       throw new BaseError('REFRESH_TOKEN_KEY is not configured', 500);

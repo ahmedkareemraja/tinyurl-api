@@ -1,4 +1,6 @@
-import { type Express, type NextFunction, type Request, type Response, Router } from 'express';
+import { type Express, Router } from 'express';
+
+import { requireToken } from '../middlewares';
 
 import authRouterV1 from './auth/auth.routes.v1';
 import usersRouterv1 from './users/users.routes.v1';
@@ -19,16 +21,11 @@ const routerConfig: {
   privateRoutes: [],
 };
 
-function authenticateToken(_req: Request, _res: Response, next: NextFunction) {
-  // TODO: implement token verification
-  next();
-}
-
 export default (app: Express) => {
   const routerPublic = Router();
   const routerPrivate = Router();
 
-  routerPrivate.use(authenticateToken);
+  routerPrivate.use(requireToken);
 
   routerConfig.publicRoutes.forEach((route) => {
     routerPublic.use(route.path, route.router);
