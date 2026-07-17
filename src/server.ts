@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 
+import passport from './config/passport';
 import errorHandler from './middlewares/errorHandler';
 import routes from './routes';
 import logger from './utils/logger';
@@ -11,6 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
 
 routes(app);
 

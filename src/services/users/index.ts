@@ -1,4 +1,4 @@
-import { type LoginRequest, type CreateUserRequest } from '../../controllers/users/dto/request';
+import { type CreateUserRequest } from '../../controllers/users/dto/request';
 import { type UserResponse } from '../../controllers/users/dto/response';
 import UsersReporsitory from '../../repositories/users';
 import BaseError from '../../utils/BaseError';
@@ -17,9 +17,7 @@ export default class UsersService {
     return await UsersReporsitory.getUserById(userId);
   }
 
-  static async loginUser(loginRequest: LoginRequest): Promise<UserResponse> {
-    const user = await UsersReporsitory.getLoginUser(loginRequest.email, loginRequest.password);
-
+  static issueTokens(user: UserResponse): UserResponse {
     const tokenPayload = {
       userid: user._id,
       email: user.email,

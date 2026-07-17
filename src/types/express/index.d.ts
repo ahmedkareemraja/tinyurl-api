@@ -2,9 +2,8 @@ import { type UserResponse } from '../../controllers/users/dto/response';
 
 declare global {
   namespace Express {
-    interface Request {
-      user?: UserResponse;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    interface User extends UserResponse {}
   }
 }
 

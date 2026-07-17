@@ -6,7 +6,10 @@
       "Bash(cat)",
       "Bash(npx tsc *)",
       "Bash(rm -f /tmp_test_catch.ts)",
-      "Bash(node -e \"console.log\\(require\\('mongoose/package.json'\\).version\\)\")"
-    ]
+      "Bash(node -e \"console.log\\(require\\('mongoose/package.json'\\).version\\)\")",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
+    ],
+    "defaultMode": "acceptEdits"
   }
 }
