@@ -67,4 +67,33 @@ export default class AuthController {
       next(err);
     }
   }
+
+  static authenticateGoogle(this: void, req: Request, res: Response, next: NextFunction) {
+    const authenticate = passport.authenticate('google', {
+      session: false,
+      scope: ['profile', 'email'],
+    }) as RequestHandler;
+    authenticate(req, res, next);
+  }
+
+  static authenticateGoogleCallback(this: void, req: Request, res: Response, next: NextFunction) {
+    const authenticate = passport.authenticate(
+      'google',
+      { session: false },
+      (err: unknown, user: Express.User | false, info: unknown) => {
+        if (err) {
+          next(err);
+          return;
+        }
+        if (!user) {
+          const message = isMessageInfo(info) ? info.message : 'Google authentication failed';
+          next(new BaseError(message, 401));
+          return;
+        }
+        req.user = user;
+        next();
+      },
+    ) as RequestHandler;
+    authenticate(req, res, next);
+  }
 }

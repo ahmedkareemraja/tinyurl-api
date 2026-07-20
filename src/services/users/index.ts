@@ -17,6 +17,14 @@ export default class UsersService {
     return await UsersReporsitory.getUserById(userId);
   }
 
+  static async findOrCreateGoogleUser(profile: {
+    googleId: string;
+    email: string;
+    fullName: string;
+  }): Promise<UserResponse> {
+    return await UsersReporsitory.findOrCreateGoogleUser(profile);
+  }
+
   static issueTokens(user: UserResponse): UserResponse {
     const tokenPayload = {
       userid: user._id,

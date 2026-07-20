@@ -8,8 +8,14 @@
       "Bash(rm -f /tmp_test_catch.ts)",
       "Bash(node -e \"console.log\\(require\\('mongoose/package.json'\\).version\\)\")",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npm ls *)",
+      "Read(//tmp/tsc-check-out/**)",
+      "Bash(rm -rf /tmp/tsc-check-out)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "\\tmp"
+    ]
   }
 }

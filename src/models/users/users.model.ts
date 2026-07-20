@@ -6,8 +6,9 @@ export interface IUser {
   _id: mongoose.Types.ObjectId;
   fullName: string;
   email: string;
-  password: string;
-  salt: string;
+  password?: string;
+  salt?: string;
+  googleId?: string;
   refreshToken?: string;
   isDeleted: boolean;
 }
@@ -25,13 +26,23 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     password: {
       type: String,
-      required: true,
+      required: function (this: IUser) {
+        return !this.googleId;
+      },
       select: false,
     },
     salt: {
       type: String,
-      required: true,
+      required: function (this: IUser) {
+        return !this.googleId;
+      },
       select: false,
+    },
+    googleId: {
+      type: String,
+      required: false,
+      unique: true,
+      sparse: true,
     },
     refreshToken: {
       type: String,
@@ -49,7 +60,7 @@ const userSchema = new mongoose.Schema<IUser>(
 );
 
 userSchema.pre('validate', function () {
-  if (!this.isModified('password')) return;
+  if (!this.isModified('password') || !this.password) return;
 
   const { salt, hash } = Encryption.createHashedPassword(this.password);
   this.salt = salt;

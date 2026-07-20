@@ -1,4 +1,5 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
+
 import express from 'express';
 import mongoose from 'mongoose';
 
@@ -7,7 +8,6 @@ import errorHandler from './middlewares/errorHandler';
 import routes from './routes';
 import logger from './utils/logger';
 
-dotenv.config();
 const app = express();
 
 app.use(express.json());
