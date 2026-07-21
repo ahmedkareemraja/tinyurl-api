@@ -14,6 +14,10 @@ export default class UsersReporsitory {
     return await User.findById(userId).lean();
   }
 
+  static async getUserByIdWithRefreshToken(userId: string): Promise<IUser | null> {
+    return await User.findById(userId).select('+refreshToken').lean();
+  }
+
   static async getUserByEmail(email: string): Promise<IUser | null> {
     return await User.findOne({ email }).lean();
   }
@@ -74,5 +78,18 @@ export default class UsersReporsitory {
       email: user.email,
       isDeleted: user.isDeleted,
     };
+  }
+
+  static async updateRefreshToken(userId: string, refreshToken?: string): Promise<void> {
+    if (typeof refreshToken === 'undefined') {
+      await User.findByIdAndUpdate(
+        userId,
+        { $unset: { refreshToken: 1 } },
+        { runValidators: true },
+      );
+      return;
+    }
+
+    await User.findByIdAndUpdate(userId, { refreshToken }, { runValidators: true });
   }
 }

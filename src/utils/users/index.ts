@@ -1,6 +1,10 @@
 import Joi from 'joi';
 
-import { type LoginRequest, type CreateUserRequest } from '../../controllers/users/dto/request';
+import {
+  type LoginRequest,
+  type CreateUserRequest,
+  type RefreshTokenRequest,
+} from '../../controllers/users/dto/request';
 import BaseError from '../BaseError';
 
 class UsersUtils {
@@ -37,6 +41,17 @@ class UsersUtils {
       throw new BaseError(`Validation error: ${result.error.details[0]?.message}`, 400, body);
     }
     return result.value as LoginRequest;
+  }
+
+  static validateRefreshTokenRequest(body: unknown): RefreshTokenRequest {
+    const refreshTokenSchema = Joi.object({
+      refreshToken: Joi.string().required(),
+    });
+    const result = refreshTokenSchema.validate(body);
+    if (result.error) {
+      throw new BaseError(`Validation error: ${result.error.details[0]?.message}`, 400, body);
+    }
+    return result.value as RefreshTokenRequest;
   }
 }
 

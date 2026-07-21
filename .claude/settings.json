@@ -11,7 +11,9 @@
       "Bash(npm run *)",
       "Bash(npm ls *)",
       "Read(//tmp/tsc-check-out/**)",
-      "Bash(rm -rf /tmp/tsc-check-out)"
+      "Bash(rm -rf /tmp/tsc-check-out)",
+      "Bash(npx eslint *)",
+      "Bash(echo \"EXIT:$?\")"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [

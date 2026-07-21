@@ -54,6 +54,22 @@ class Encryption {
     }
     return jwt.sign(payload, secret, { expiresIn: '7d' });
   }
+
+  static verifyRefreshToken(token: string): TokenPayload {
+    const secret = process.env['REFRESH_TOKEN_KEY'];
+    if (!secret) {
+      throw new BaseError('REFRESH_TOKEN_KEY is not configured', 500);
+    }
+    try {
+      const decoded = jwt.verify(token, secret);
+      if (typeof decoded === 'string') {
+        throw new BaseError('Invalid refresh token', 401);
+      }
+      return decoded as TokenPayload;
+    } catch {
+      throw new BaseError('Invalid or expired refresh token', 401);
+    }
+  }
 }
 
 export default Encryption;

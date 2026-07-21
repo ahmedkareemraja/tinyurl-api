@@ -25,7 +25,7 @@ export default class UsersService {
     return await UsersReporsitory.findOrCreateGoogleUser(profile);
   }
 
-  static issueTokens(user: UserResponse): UserResponse {
+  static async issueTokens(user: UserResponse): Promise<UserResponse> {
     const tokenPayload = {
       userid: user._id,
       email: user.email,
@@ -34,6 +34,37 @@ export default class UsersService {
     const token = Encryption.generateToken(tokenPayload);
     const refreshToken = Encryption.generateRefreshToken(tokenPayload);
 
+    await UsersReporsitory.updateRefreshToken(user._id, refreshToken);
+
     return { ...user, accessToken: token, refreshToken };
+  }
+
+  static async logout(userId: string): Promise<void> {
+    await UsersReporsitory.updateRefreshToken(userId, undefined);
+  }
+
+  static async refreshTokens(refreshToken: string): Promise<UserResponse> {
+    const payload = Encryption.verifyRefreshToken(refreshToken);
+
+    const user = await UsersReporsitory.getUserByIdWithRefreshToken(payload.userid);
+    if (!user || user.isDeleted) {
+      throw new BaseError('User not found', 404);
+    }
+
+    if (!user.refreshToken || user.refreshToken !== refreshToken) {
+      // Stored token differs from the one presented: either it was already
+      // rotated or revoked (logout), so treat this as a reuse attempt.
+      await UsersReporsitory.updateRefreshToken(user._id.toString(), undefined);
+      throw new BaseError('Invalid or expired refresh token', 401);
+    }
+
+    const userResponse: UserResponse = {
+      _id: user._id.toString(),
+      fullName: user.fullName,
+      email: user.email,
+      isDeleted: user.isDeleted,
+    };
+
+    return await UsersService.issueTokens(userResponse);
   }
 }
