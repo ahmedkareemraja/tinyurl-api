@@ -6,7 +6,7 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: './tsconfig.json',
+    project: ['./Tinyurl-api/tsconfig.json', './kgs/tsconfig.json'],
     tsconfigRootDir: __dirname,
   },
   plugins: ['@typescript-eslint', 'import', 'prettier'],
@@ -74,5 +74,5 @@ module.exports = {
     'no-var': 'error',
     'prefer-const': 'error',
   },
-  ignorePatterns: ['dist', 'node_modules', '.eslintrc.cjs'],
+  ignorePatterns: ['**/dist/**', '**/node_modules/**', '.eslintrc.cjs'],
 };
