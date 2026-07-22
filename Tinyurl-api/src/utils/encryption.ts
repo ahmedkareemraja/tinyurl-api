@@ -1,9 +1,7 @@
 import crypto from 'crypto';
 
 import jwt from 'jsonwebtoken';
-
-import BaseError from './BaseError';
-import logger from './logger';
+import { BaseError, logger } from 'shared';
 
 export interface TokenPayload {
   userid: string;

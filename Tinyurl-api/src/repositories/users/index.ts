@@ -1,7 +1,8 @@
+import { BaseError } from 'shared';
+
 import { type CreateUserRequest } from '../../controllers/users/dto/request';
 import { type UserResponse } from '../../controllers/users/dto/response';
 import User, { type IUser } from '../../models/users/users.model';
-import BaseError from '../../utils/BaseError';
 import Encryption from '../../utils/encryption';
 
 export default class UsersReporsitory {

@@ -6,7 +6,7 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: ['./Tinyurl-api/tsconfig.json', './kgs/tsconfig.json'],
+    project: ['./shared/tsconfig.json', './Tinyurl-api/tsconfig.json', './kgs/tsconfig.json'],
     tsconfigRootDir: __dirname,
   },
   plugins: ['@typescript-eslint', 'import', 'prettier'],
@@ -61,6 +61,8 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'error',
     'import/no-unresolved': 'error',
     'import/no-named-as-default-member': 'off',
+    // False positive on CJS packages using `export =` type declarations (e.g. jsonwebtoken)
+    'import/default': 'off',
     'import/order': [
       'warn',
       {

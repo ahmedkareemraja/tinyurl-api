@@ -5,15 +5,19 @@
   "license": "ISC",
   "author": "",
   "private": true,
-  "workspaces": ["Tinyurl-api", "kgs"],
+  "workspaces": [
+    "shared",
+    "Tinyurl-api",
+    "kgs"
+  ],
   "scripts": {
-    "dev:api": "npm run dev --workspace=tinyurl-api",
-    "dev:kgs": "npm run dev --workspace=kgs",
-    "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run build --workspace=shared && npm run dev --workspace=tinyurl-api",
+    "dev:kgs": "npm run build --workspace=shared && npm run dev --workspace=kgs",
+    "build": "npm run build --workspace=shared && npm run build --workspaces --if-present",
     "start:api": "npm run start --workspace=tinyurl-api",
     "start:kgs": "npm run start --workspace=kgs",
     "lint": "eslint . --ext .ts,.js",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspace=shared && npm run typecheck --workspaces --if-present",
     "format": "prettier --write ."
   },
   "devDependencies": {
@@ -28,5 +32,9 @@
     "prettier": "^3.9.5",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "bullmq": "^5.80.10",
+    "ioredis": "^5.11.1"
   }
 }

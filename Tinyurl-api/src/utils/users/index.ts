@@ -1,11 +1,11 @@
 import Joi from 'joi';
+import { BaseError } from 'shared';
 
 import {
   type LoginRequest,
   type CreateUserRequest,
   type RefreshTokenRequest,
 } from '../../controllers/users/dto/request';
-import BaseError from '../BaseError';
 
 class UsersUtils {
   static validateCreateUser(body: unknown): CreateUserRequest {

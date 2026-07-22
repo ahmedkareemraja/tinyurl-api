@@ -1,7 +1,5 @@
 import { type Request, type Response, type NextFunction } from 'express';
-
-import type BaseError from '../utils/BaseError';
-import logger from '../utils/logger';
+import { type BaseError, logger } from 'shared';
 
 const errorHandler = (err: BaseError, _req: Request, res: Response, _next: NextFunction) => {
   const statusCode = res.statusCode ? res.statusCode : 500;

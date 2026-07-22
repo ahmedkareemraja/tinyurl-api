@@ -5,11 +5,11 @@ import cluster from 'cluster';
 import express from 'express';
 import { rateLimit, MINUTE } from 'express-rate-limit';
 import mongoose from 'mongoose';
+import { logger } from 'shared';
 
 import passport from './config/passport';
 import errorHandler from './middlewares/errorHandler';
 import routes from './routes';
-import logger from './utils/logger';
 
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`);

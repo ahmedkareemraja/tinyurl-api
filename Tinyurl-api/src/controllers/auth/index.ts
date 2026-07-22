@@ -1,8 +1,8 @@
 import { type NextFunction, type Request, type RequestHandler, type Response } from 'express';
+import { BaseError } from 'shared';
 
 import passport from '../../config/passport';
 import UsersService from '../../services/users';
-import BaseError from '../../utils/BaseError';
 import UsersUtils from '../../utils/users';
 
 function isMessageInfo(info: unknown): info is { message: string } {

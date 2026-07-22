@@ -1,11 +1,10 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
+import { BaseError, logger } from 'shared';
 
 import UsersRepository from '../repositories/users';
 import UsersService from '../services/users';
-import BaseError from '../utils/BaseError';
-import logger from '../utils/logger';
 
 passport.use(
   new LocalStrategy(
