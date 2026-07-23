@@ -1,10 +1,5 @@
-import { Queue } from 'bullmq';
-import { QUEUE_NAMES, createBullMQConnection } from 'shared';
+import { createMessagePublisher, type MessagePublisher } from 'shared';
 
-export const keyEventsQueue = new Queue(QUEUE_NAMES.KEY_EVENTS, {
-  connection: createBullMQConnection(),
-});
+const messagePublisher: MessagePublisher = createMessagePublisher();
 
-export const keyGenerationQueue = new Queue(QUEUE_NAMES.KEY_GENERATION, {
-  connection: createBullMQConnection(),
-});
+export default messagePublisher;

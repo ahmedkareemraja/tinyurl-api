@@ -2,6 +2,7 @@ import {
   redisClient,
   BaseError,
   JOB_NAMES,
+  QUEUE_NAMES,
   REDIS_KEY_POOL_NAME,
   KEY_POOL_LOW_WATERMARK,
   KEY_GENERATION_BATCH_SIZE,
@@ -10,7 +11,7 @@ import {
 import { type CreateUrlRequest } from '../../controllers/urls/dto/request';
 import { type UrlResponse } from '../../controllers/urls/dto/response';
 import { type IUrl } from '../../models/urls/urls.model';
-import { keyEventsQueue, keyGenerationQueue } from '../../queue';
+import messagePublisher from '../../queue';
 import getBlockingRedisClient from '../../redis/blockingClient';
 import UrlsRepository from '../../repositories/urls';
 
@@ -23,11 +24,14 @@ export default class UrlsService {
 
     const url = await UrlsRepository.createUrl({ key, longUrl: data.longUrl, userId });
 
-    await keyEventsQueue.add(JOB_NAMES.MARK_KEY_USED, { key, userId });
+    await messagePublisher.publish(QUEUE_NAMES.KEY_EVENTS, JOB_NAMES.MARK_KEY_USED, {
+      key,
+      userId,
+    });
 
     const remainingKeys = await redisClient.lLen(REDIS_KEY_POOL_NAME);
     if (remainingKeys < KEY_POOL_LOW_WATERMARK) {
-      await keyGenerationQueue.add(JOB_NAMES.GENERATE_KEYS, {
+      await messagePublisher.publish(QUEUE_NAMES.KEY_GENERATION, JOB_NAMES.GENERATE_KEYS, {
         count: KEY_GENERATION_BATCH_SIZE,
       });
     }
@@ -54,7 +58,9 @@ export default class UrlsService {
     const key = await redisClient.lPop(REDIS_KEY_POOL_NAME);
     if (key) return key;
 
-    await keyGenerationQueue.add(JOB_NAMES.GENERATE_KEYS, { count: KEY_GENERATION_BATCH_SIZE });
+    await messagePublisher.publish(QUEUE_NAMES.KEY_GENERATION, JOB_NAMES.GENERATE_KEYS, {
+      count: KEY_GENERATION_BATCH_SIZE,
+    });
 
     const blockingClient = await getBlockingRedisClient();
     const result = await blockingClient.blPop(REDIS_KEY_POOL_NAME, KEY_WAIT_TIMEOUT_SECONDS);

@@ -1,5 +1,3 @@
-import IORedis from 'ioredis';
-
 export const QUEUE_NAMES = {
   KEY_EVENTS: 'key-events',
   KEY_GENERATION: 'key-generation',
@@ -27,9 +25,3 @@ export const KEY_POOL_LOW_WATERMARK = 100;
 
 // How many keys kgs generates per generation request.
 export const KEY_GENERATION_BATCH_SIZE = 500;
-
-export function createBullMQConnection(): IORedis {
-  return new IORedis(process.env['REDIS_URL'] ?? 'redis://localhost:6379', {
-    maxRetriesPerRequest: null,
-  });
-}

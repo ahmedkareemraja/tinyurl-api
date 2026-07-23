@@ -13,7 +13,8 @@
       "Read(//tmp/tsc-check-out/**)",
       "Bash(rm -rf /tmp/tsc-check-out)",
       "Bash(npx eslint *)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(echo \"EXIT: $?\")"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [

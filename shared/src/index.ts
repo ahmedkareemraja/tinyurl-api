@@ -7,7 +7,13 @@ export {
   REDIS_KEY_POOL_NAME,
   KEY_POOL_LOW_WATERMARK,
   KEY_GENERATION_BATCH_SIZE,
-  createBullMQConnection,
   type MarkKeyUsedJobData,
   type GenerateKeysJobData,
 } from './queue';
+export {
+  createMessagePublisher,
+  createMessageConsumer,
+  type MessagePublisher,
+  type MessageConsumer,
+  type MessageHandler,
+} from './messaging';

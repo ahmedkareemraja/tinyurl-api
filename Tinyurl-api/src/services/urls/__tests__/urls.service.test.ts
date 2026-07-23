@@ -22,32 +22,30 @@
     REDIS_KEY_POOL_NAME: 'kgs:available-keys',
     KEY_POOL_LOW_WATERMARK: 100,
     KEY_GENERATION_BATCH_SIZE: 500,
-    createBullMQConnection: jest.fn(),
   };
 });
 
 jest.mock('../../../repositories/urls');
 
 jest.mock('../../../queue', () => ({
-  keyEventsQueue: { add: jest.fn() },
-  keyGenerationQueue: { add: jest.fn() },
+  __esModule: true,
+  default: { publish: jest.fn(), close: jest.fn() },
 }));
 
 jest.mock('../../../redis/blockingClient', () => jest.fn());
 
-import { BaseError, redisClient, JOB_NAMES, KEY_GENERATION_BATCH_SIZE } from 'shared';
+import { BaseError, redisClient, JOB_NAMES, QUEUE_NAMES, KEY_GENERATION_BATCH_SIZE } from 'shared';
 
 import UrlsService from '..';
 import { type IUrl } from '../../../models/urls/urls.model';
-import { keyEventsQueue, keyGenerationQueue } from '../../../queue';
+import messagePublisher from '../../../queue';
 import getBlockingRedisClient from '../../../redis/blockingClient';
 import UrlsRepository from '../../../repositories/urls';
 
 const mockedRedisClient = jest.mocked(redisClient);
 const mockedRepository = jest.mocked(UrlsRepository);
 const mockedGetBlockingRedisClient = jest.mocked(getBlockingRedisClient);
-const addKeyEventsJob = (keyEventsQueue as unknown as { add: jest.Mock }).add;
-const addKeyGenerationJob = (keyGenerationQueue as unknown as { add: jest.Mock }).add;
+const publishMessage = (messagePublisher as unknown as { publish: jest.Mock }).publish;
 
 function fakeUrl(overrides: Partial<{ key: string; longUrl: string; userId?: string }> = {}) {
   const { key = 'abc1234', longUrl = 'https://example.com', userId } = overrides;
@@ -85,9 +83,13 @@ describe('UrlsService.shortenUrl', () => {
 
     const result = await UrlsService.shortenUrl({ longUrl: 'https://example.com' });
 
-    expect(addKeyGenerationJob).toHaveBeenCalledWith(JOB_NAMES.GENERATE_KEYS, {
-      count: KEY_GENERATION_BATCH_SIZE,
-    });
+    expect(publishMessage).toHaveBeenCalledWith(
+      QUEUE_NAMES.KEY_GENERATION,
+      JOB_NAMES.GENERATE_KEYS,
+      {
+        count: KEY_GENERATION_BATCH_SIZE,
+      },
+    );
     expect(blPop).toHaveBeenCalledWith('kgs:available-keys', expect.any(Number));
     expect(result.key).toBe('freshKey');
     expect(mockedRepository.createUrl).toHaveBeenCalledWith(
@@ -117,7 +119,7 @@ describe('UrlsService.shortenUrl', () => {
 
     await UrlsService.shortenUrl({ longUrl: 'https://example.com' }, 'user-1');
 
-    expect(addKeyEventsJob).toHaveBeenCalledWith(JOB_NAMES.MARK_KEY_USED, {
+    expect(publishMessage).toHaveBeenCalledWith(QUEUE_NAMES.KEY_EVENTS, JOB_NAMES.MARK_KEY_USED, {
       key: 'abc1234',
       userId: 'user-1',
     });
@@ -130,7 +132,7 @@ describe('UrlsService.shortenUrl', () => {
 
     await UrlsService.shortenUrl({ longUrl: 'https://example.com' });
 
-    expect(addKeyEventsJob).toHaveBeenCalledWith(JOB_NAMES.MARK_KEY_USED, {
+    expect(publishMessage).toHaveBeenCalledWith(QUEUE_NAMES.KEY_EVENTS, JOB_NAMES.MARK_KEY_USED, {
       key: 'abc1234',
       userId: undefined,
     });
@@ -143,9 +145,13 @@ describe('UrlsService.shortenUrl', () => {
 
     await UrlsService.shortenUrl({ longUrl: 'https://example.com' });
 
-    expect(addKeyGenerationJob).toHaveBeenCalledWith(JOB_NAMES.GENERATE_KEYS, {
-      count: KEY_GENERATION_BATCH_SIZE,
-    });
+    expect(publishMessage).toHaveBeenCalledWith(
+      QUEUE_NAMES.KEY_GENERATION,
+      JOB_NAMES.GENERATE_KEYS,
+      {
+        count: KEY_GENERATION_BATCH_SIZE,
+      },
+    );
   });
 
   it('does not request more keys when the pool is comfortably stocked after use', async () => {
@@ -155,7 +161,11 @@ describe('UrlsService.shortenUrl', () => {
 
     await UrlsService.shortenUrl({ longUrl: 'https://example.com' });
 
-    expect(addKeyGenerationJob).not.toHaveBeenCalled();
+    expect(publishMessage).not.toHaveBeenCalledWith(
+      QUEUE_NAMES.KEY_GENERATION,
+      JOB_NAMES.GENERATE_KEYS,
+      expect.anything(),
+    );
   });
 });
 
