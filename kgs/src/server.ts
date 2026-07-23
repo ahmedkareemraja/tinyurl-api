@@ -4,7 +4,9 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { logger, KEY_POOL_LOW_WATERMARK, KEY_GENERATION_BATCH_SIZE } from 'shared';
 
+import errorHandler from './middlewares/errorHandler';
 import { startKeyEventsWorker, startKeyGenerationWorker } from './queue/workers';
+import routes from './routes';
 import KeysService from './services/keys';
 
 const app = express();
@@ -18,9 +20,15 @@ if (!DB_CONNECTION_STRING) {
   throw new Error('Missing DB_CONNECTION_STRING environment variable');
 }
 
+app.use(express.json());
+
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: true });
 });
+
+routes(app);
+
+app.use(errorHandler);
 
 mongoose
   .connect(DB_CONNECTION_STRING)

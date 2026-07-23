@@ -10,13 +10,10 @@ import {
 
 import { type CreateUrlRequest } from '../../controllers/urls/dto/request';
 import { type UrlResponse } from '../../controllers/urls/dto/response';
+import KgsGateway from '../../gateway/kgs';
 import { type IUrl } from '../../models/urls/urls.model';
 import messagePublisher from '../../queue';
-import getBlockingRedisClient from '../../redis/blockingClient';
 import UrlsRepository from '../../repositories/urls';
-
-// How long to wait for kgs to replenish the pool before giving up.
-const KEY_WAIT_TIMEOUT_SECONDS = 10;
 
 export default class UrlsService {
   static async shortenUrl(data: CreateUrlRequest, userId?: string): Promise<UrlResponse> {
@@ -52,8 +49,11 @@ export default class UrlsService {
     return url;
   }
 
-  // Pops a key from the pool, requesting generation and waiting for a fresh
-  // one to arrive if the pool is currently empty rather than failing outright.
+  // Pops a key from the redis pool - the fast path for almost every request.
+  // If the pool is empty, this asks kgs to replenish it in the background
+  // (for future requests) and falls back to asking kgs directly for a
+  // single key on demand, rather than blocking a redis connection waiting
+  // for the pool to be refilled.
   private static async popKeyFromPool(): Promise<string> {
     const key = await redisClient.lPop(REDIS_KEY_POOL_NAME);
     if (key) return key;
@@ -62,13 +62,7 @@ export default class UrlsService {
       count: KEY_GENERATION_BATCH_SIZE,
     });
 
-    const blockingClient = await getBlockingRedisClient();
-    const result = await blockingClient.blPop(REDIS_KEY_POOL_NAME, KEY_WAIT_TIMEOUT_SECONDS);
-    if (!result) {
-      throw new BaseError('No short keys available right now, please try again shortly', 503);
-    }
-
-    return result.element;
+    return await KgsGateway.getNextKey();
   }
 
   private static toResponse(url: IUrl): UrlResponse {

@@ -32,19 +32,22 @@ jest.mock('../../../queue', () => ({
   default: { publish: jest.fn(), close: jest.fn() },
 }));
 
-jest.mock('../../../redis/blockingClient', () => jest.fn());
+jest.mock('../../../gateway/kgs', () => ({
+  __esModule: true,
+  default: { getNextKey: jest.fn() },
+}));
 
 import { BaseError, redisClient, JOB_NAMES, QUEUE_NAMES, KEY_GENERATION_BATCH_SIZE } from 'shared';
 
 import UrlsService from '..';
+import KgsGateway from '../../../gateway/kgs';
 import { type IUrl } from '../../../models/urls/urls.model';
 import messagePublisher from '../../../queue';
-import getBlockingRedisClient from '../../../redis/blockingClient';
 import UrlsRepository from '../../../repositories/urls';
 
 const mockedRedisClient = jest.mocked(redisClient);
 const mockedRepository = jest.mocked(UrlsRepository);
-const mockedGetBlockingRedisClient = jest.mocked(getBlockingRedisClient);
+const mockedKgsGateway = jest.mocked(KgsGateway);
 const publishMessage = (messagePublisher as unknown as { publish: jest.Mock }).publish;
 
 function fakeUrl(overrides: Partial<{ key: string; longUrl: string; userId?: string }> = {}) {
@@ -74,11 +77,10 @@ describe('UrlsService.shortenUrl', () => {
     });
   });
 
-  it('never fails outright when the pool is empty: it commands kgs to generate more keys', async () => {
+  it('never fails outright when the pool is empty: it asks kgs directly for a key after requesting replenishment', async () => {
     mockedRedisClient.lPop.mockResolvedValue(null);
     mockedRedisClient.lLen.mockResolvedValue(500);
-    const blPop = jest.fn().mockResolvedValue({ key: 'kgs:available-keys', element: 'freshKey' });
-    mockedGetBlockingRedisClient.mockResolvedValue({ blPop } as never);
+    mockedKgsGateway.getNextKey.mockResolvedValue('freshKey');
     mockedRepository.createUrl.mockResolvedValue(fakeUrl({ key: 'freshKey' }));
 
     const result = await UrlsService.shortenUrl({ longUrl: 'https://example.com' });
@@ -90,17 +92,18 @@ describe('UrlsService.shortenUrl', () => {
         count: KEY_GENERATION_BATCH_SIZE,
       },
     );
-    expect(blPop).toHaveBeenCalledWith('kgs:available-keys', expect.any(Number));
+    expect(mockedKgsGateway.getNextKey).toHaveBeenCalled();
     expect(result.key).toBe('freshKey');
     expect(mockedRepository.createUrl).toHaveBeenCalledWith(
       expect.objectContaining({ key: 'freshKey' }),
     );
   });
 
-  it('throws a 503 as a last resort if kgs cannot replenish the pool in time', async () => {
+  it('propagates the error kgs raises when it cannot provide a key on demand', async () => {
     mockedRedisClient.lPop.mockResolvedValue(null);
-    const blPop = jest.fn().mockResolvedValue(null);
-    mockedGetBlockingRedisClient.mockResolvedValue({ blPop } as never);
+    mockedKgsGateway.getNextKey.mockRejectedValue(
+      new BaseError('No short keys available right now, please try again shortly', 503),
+    );
 
     await expect(UrlsService.shortenUrl({ longUrl: 'https://example.com' })).rejects.toThrow(
       BaseError,

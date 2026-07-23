@@ -1,6 +1,20 @@
-jest.mock('shared', () => ({
-  logger: { info: jest.fn(), error: jest.fn(), warn: jest.fn() },
-}));
+jest.mock('shared', () => {
+  class BaseError extends Error {
+    statusCode: number;
+    data: unknown;
+
+    constructor(message = 'Something went wrong', statusCode = 400, data: unknown = {}) {
+      super(message);
+      this.statusCode = statusCode;
+      this.data = data;
+    }
+  }
+
+  return {
+    BaseError,
+    logger: { info: jest.fn(), error: jest.fn(), warn: jest.fn() },
+  };
+});
 
 jest.mock('../../../repositories/keys');
 jest.mock('../../../utils/keys');
@@ -52,6 +66,35 @@ describe('KeysService.generateAndStoreKeys', () => {
     await KeysService.generateAndStoreKeys(3);
 
     expect(mockedRepository.pushKeysToRedisPool).toHaveBeenCalledWith(['a', 'c']);
+  });
+});
+
+describe('KeysService.generateSingleKey', () => {
+  it('returns the first candidate that persists successfully', async () => {
+    mockedUtils.generateRandomKey.mockReturnValueOnce('abc1234');
+    mockedRepository.insertKeys.mockResolvedValueOnce(['abc1234']);
+
+    const key = await KeysService.generateSingleKey();
+
+    expect(key).toBe('abc1234');
+    expect(mockedRepository.insertKeys).toHaveBeenCalledWith(['abc1234']);
+  });
+
+  it('retries with a new candidate when one collides with an existing key', async () => {
+    mockedUtils.generateRandomKey.mockReturnValueOnce('dup').mockReturnValueOnce('unique1');
+    mockedRepository.insertKeys.mockResolvedValueOnce([]).mockResolvedValueOnce(['unique1']);
+
+    const key = await KeysService.generateSingleKey();
+
+    expect(key).toBe('unique1');
+    expect(mockedRepository.insertKeys).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up after repeated collisions rather than retrying forever', async () => {
+    mockedUtils.generateRandomKey.mockReturnValue('dup');
+    mockedRepository.insertKeys.mockResolvedValue([]);
+
+    await expect(KeysService.generateSingleKey()).rejects.toMatchObject({ statusCode: 503 });
   });
 });
 
