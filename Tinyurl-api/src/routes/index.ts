@@ -3,6 +3,8 @@ import { type Express, Router } from 'express';
 import { requireToken } from '../middlewares';
 
 import authRouterV1 from './auth/auth.routes.v1';
+import redirectRouter from './redirect/redirect.routes';
+import urlsRouterv1 from './urls/urls.routes.v1';
 import usersRouterv1 from './users/users.routes.v1';
 
 interface RouteDefinition {
@@ -17,6 +19,8 @@ const routerConfig: {
   publicRoutes: [
     { path: '/api/v1/users', router: usersRouterv1 },
     { path: '/api/v1/auth', router: authRouterV1 },
+    { path: '/api/v1/urls', router: urlsRouterv1 },
+    { path: '/', router: redirectRouter },
   ],
   privateRoutes: [],
 };
